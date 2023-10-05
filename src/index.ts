@@ -7,10 +7,6 @@ const app = express();
 app.use(express.json());
 const port = 3000;
 
-const users = Array.from({ length: 10 }).map(() => {
-  return { name: faker.internet.userName(), email: faker.internet.email() };
-});
-
 app.get("/", async (req: Request, res: Response) => {
   res.json({ message: "Congratulations, you're now connected to the api!" });
 });

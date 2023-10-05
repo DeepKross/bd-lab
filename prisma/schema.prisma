@@ -3,12 +3,203 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model user {
-  id    Int    @id @default(autoincrement())
-  name  String @db.VarChar(99)
-  email String @db.VarChar(99)
+model Restaurants {
+  id              Int             @id @default(autoincrement())
+  name            String          @db.VarChar(50)
+  description     String?
+  picture         String          @db.VarChar(14)
+  address         String          @db.VarChar(255)
+  phone           String?         @db.VarChar(20)
+  typeId          Int
+  personnelId     Int?            @unique
+  RestaurantTypes RestaurantTypes @relation(fields: [typeId], references: [id])
+  Personnel       Personnel?      @relation(fields: [personnelId], references: [id])
+  Tables          Tables[]
+  Reservations    Reservations[]
+  Reviews         Reviews[]
+  Dishes          Dishes[]
+  Events          Events[]
+}
+
+model Tables {
+  id           Int            @id @default(autoincrement())
+  status       String         @db.VarChar(20)
+  seats        Int?
+  restaurantId Int
+  Restaurants  Restaurants    @relation(fields: [restaurantId], references: [id])
+  Reservations Reservations[]
+  Orders       Orders[]
+}
+
+model Reservations {
+  id                  Int         @id @default(autoincrement())
+  restaurantId        Int
+  customerName        String      @db.VarChar(32)
+  tableId             Int
+  reservationDate     DateTime
+  partySize           Int
+  specialRequests     String?
+  status              String      @db.VarChar(20)
+  personnelWhoUpdated Int?
+  updatedAt           DateTime?
+  createdAt           DateTime    @default(now())
+  Restaurants         Restaurants @relation(fields: [restaurantId], references: [id])
+  Tables              Tables      @relation(fields: [tableId], references: [id])
+  Personnel           Personnel?  @relation(fields: [personnelWhoUpdated], references: [id])
+}
+
+model Reviews {
+  id            Int         @id @default(autoincrement())
+  reviewersName String      @db.VarChar(32)
+  restaurantId  Int
+  rating        Int
+  reviewText    String?
+  reviewDate    DateTime
+  createdAt     DateTime    @default(now())
+  Restaurants   Restaurants @relation(fields: [restaurantId], references: [id])
+}
+
+model Orders {
+  id                  Int            @id @default(autoincrement())
+  status              String         @db.VarChar(20)
+  tableId             Int
+  personnelWhoUpdated Int?
+  updatedAt           DateTime?
+  createdAt           DateTime       @default(now())
+  Tables              Tables         @relation(fields: [tableId], references: [id])
+  Transactions        Transactions[]
+  OrderItems          OrderItems[]
+  Personnel           Personnel?     @relation(fields: [personnelWhoUpdated], references: [id])
+}
+
+model OrderItems {
+  id        Int      @id @default(autoincrement())
+  dishId    Int
+  orderId   Int
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  Dishes    Dishes   @relation(fields: [dishId], references: [id])
+  Orders    Orders   @relation(fields: [orderId], references: [id])
+}
+
+model Transactions {
+  id            Int       @id @default(autoincrement())
+  paymantAmount Int
+  paymentDate   DateTime
+  orderId       Int
+  type          String    @db.VarChar(20)
+  updatedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  Orders        Orders    @relation(fields: [orderId], references: [id])
+}
+
+model Dishes {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(50)
+  restaurantId       Int?
+  picture            String               @db.VarChar(14)
+  typeId             Int
+  spicy              Boolean              @default(false)
+  vegetarian         Boolean              @default(false)
+  pescatarian        Boolean              @default(false)
+  portionWeight      Int
+  price              Float
+  status             String               @db.VarChar(20)
+  adminIdWhoUpdated  Int?
+  updatedAt          DateTime
+  createdAt          DateTime             @default(now())
+  DishTypes          DishTypes            @relation(fields: [typeId], references: [id])
+  Restaurants        Restaurants?         @relation(fields: [restaurantId], references: [id])
+  Dishes_Ingredients Dishes_Ingredients[]
+  OrderItems         OrderItems[]
+  Personnel          Personnel?           @relation(fields: [adminIdWhoUpdated], references: [id])
+}
+
+model Dishes_Ingredients {
+  id           Int         @id @default(autoincrement())
+  dishId       Int
+  ingredientId Int
+  Dishes       Dishes      @relation(fields: [dishId], references: [id])
+  Ingredients  Ingredients @relation(fields: [ingredientId], references: [id])
+}
+
+model Ingredients {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(50)
+  allergyId          Int?
+  type               String               @db.VarChar(100)
+  description        String?
+  source             String               @db.VarChar(100)
+  isOrganic          Boolean              @default(false)
+  isGlutenFree       Boolean              @default(false)
+  Dishes_Ingredients Dishes_Ingredients[]
+  Allergy            Allergy?             @relation(fields: [allergyId], references: [id])
+}
+
+model Allergy {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(50)
+  description String?
+  severity    String        @db.VarChar(20)
+  Ingredients Ingredients[]
+}
+
+model Personnel {
+  id                Int            @id @default(autoincrement())
+  name              String         @db.VarChar(23)
+  password          String         @db.VarChar(30)
+  role              String         @db.VarChar(20)
+  gender            String?        @db.VarChar(20)
+  phone             String?        @db.VarChar(20)
+  email             String?        @db.VarChar(50)
+  address           String?        @db.VarChar(255)
+  picture           String         @db.VarChar(13)
+  adminWhoUpdated   Int?
+  updatedBy         Personnel?     @relation("PersonnelToPersonnel", fields: [adminWhoUpdated], references: [id])
+  updatedPersonnels Personnel[]    @relation("PersonnelToPersonnel")
+  createdAt         DateTime       @default(now())
+  Restaurants       Restaurants?
+  Reservations      Reservations[]
+  Orders            Orders[]
+  Dishes            Dishes[]
+  Tokens            Tokens[]
+}
+
+model Tokens {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  expire       String    @db.VarChar(55)
+  refreshToken String    @db.VarChar(255)
+  role         String    @db.VarChar(20)
+  token        String    @db.VarChar(255)
+  tokenId      String    @db.VarChar(255)
+  Personnel    Personnel @relation(fields: [userId], references: [id])
+}
+
+model Events {
+  id           Int         @id @default(autoincrement())
+  restaurantId Int
+  eventName    String      @db.VarChar(100)
+  eventDate    DateTime
+  description  String?
+  status       String      @db.VarChar(20)
+  updatedAt    DateTime?
+  createdAt    DateTime    @default(now())
+  Restaurants  Restaurants @relation(fields: [restaurantId], references: [id])
+}
+
+model RestaurantTypes {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(20)
+  Restaurants Restaurants[]
+}
+
+model DishTypes {
+  id     Int      @id @default(autoincrement())
+  name   String   @db.VarChar(20)
+  Dishes Dishes[]
 }
