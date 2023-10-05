@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import express, { Request, Response } from "express";
-import { faker } from "@faker-js/faker";
 
 const app = express();
 app.use(express.json());

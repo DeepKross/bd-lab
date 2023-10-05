@@ -1,5 +1,5 @@
 {
-  "name": "node-express-prisma-boilerplate",
+  "name": "db-lab",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",

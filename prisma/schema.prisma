@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -15,9 +15,9 @@ model Restaurants {
   address         String          @db.VarChar(255)
   phone           String?         @db.VarChar(20)
   typeId          Int
-  personnelId     Int?            @unique
+  personnelId     Int?
   RestaurantTypes RestaurantTypes @relation(fields: [typeId], references: [id])
-  Personnel       Personnel?      @relation(fields: [personnelId], references: [id])
+  Personnel       Personnel[] // This changes to an array to represent one-to-many
   Tables          Tables[]
   Reservations    Reservations[]
   Reviews         Reviews[]
@@ -159,14 +159,17 @@ model Personnel {
   address           String?        @db.VarChar(255)
   picture           String         @db.VarChar(13)
   adminWhoUpdated   Int?
-  updatedBy         Personnel?     @relation("PersonnelToPersonnel", fields: [adminWhoUpdated], references: [id])
-  updatedPersonnels Personnel[]    @relation("PersonnelToPersonnel")
   createdAt         DateTime       @default(now())
-  Restaurants       Restaurants?
+  updatedAt         DateTime?
+  restaurantId      Int?
+  Restaurants       Restaurants?   @relation(fields: [restaurantId], references: [id])
   Reservations      Reservations[]
   Orders            Orders[]
   Dishes            Dishes[]
   Tokens            Tokens[]
+  updatedBy         Personnel?     @relation("PersonnelToPersonnel", fields: [adminWhoUpdated], references: [id])
+  updatedPersonnels Personnel[]    @relation("PersonnelToPersonnel")
+  restaurantsId     Int?
 }
 
 model Tokens {
