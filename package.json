@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node ./dist/index.js",
     "dev": "nodemon ./src/index.ts",
-    "build": "tsc -p tsconfig.prod.json"
+    "seed": "npx prisma db seed",
+    "drop": "npx prisma migrate reset",
+    "build": "tsc -p tsconfig.prod.json",
+    "docker:dev-db:start": "docker-compose -f docker-compose.yml up -d"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.5.0",

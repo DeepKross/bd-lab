@@ -10,4 +10,9 @@ app.get("/", async (req: Request, res: Response) => {
   res.json({ message: "Congratulations, you're now connected to the api!" });
 });
 
-app.listen(port, () => console.log(`Served on port ${port}`));
+prisma.$connect().then(() => {
+  console.log('Connected to SQL Database');
+  app.listen(port, () => {
+    console.log(`Listening to port ${port}`);
+  });
+});
