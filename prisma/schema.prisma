@@ -101,7 +101,7 @@ model Dishes {
   id                 Int                  @id @default(autoincrement())
   name               String               @db.VarChar(50)
   restaurantId       Int?
-  picture            String               @db.VarChar(14)
+  picture            String?              @db.VarChar(25)
   typeId             Int
   spicy              Boolean              @default(false)
   vegetarian         Boolean              @default(false)

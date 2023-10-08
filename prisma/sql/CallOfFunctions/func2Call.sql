@@ -1,0 +1,1 @@
+SELECT TotalSeatsInRestaurant(1)
