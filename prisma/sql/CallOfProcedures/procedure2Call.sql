@@ -1,1 +1,1 @@
-CALL UpdateTableStatus(1, 'fresdafe')
+CALL UpdateTableStatus(1, 'great place')
